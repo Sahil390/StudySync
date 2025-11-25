@@ -1,0 +1,39 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+app.use(morgan('dev'));
+
+// Routes
+import authRoutes from './modules/auth/auth.routes';
+import profileRoutes from './modules/profile/profile.routes';
+import studyMaterialRoutes from './modules/studyMaterial/studyMaterial.routes';
+import quizRoutes from './modules/quiz/quiz.routes';
+import forumRoutes from './modules/forum/forum.routes';
+import analyticsRoutes from './modules/analytics/analytics.routes';
+import notificationRoutes from './modules/notifications/notifications.routes';
+import leaderboardRoutes from './modules/leaderboard/leaderboard.routes';
+import aiRoutes from './modules/ai/ai.routes';
+
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/study-material', studyMaterialRoutes);
+app.use('/api/quiz', quizRoutes);
+app.use('/api/forum', forumRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/ai', aiRoutes);
+
+app.get('/', (req, res) => {
+    res.send('StudySync API is running...');
+});
+
+export default app;
