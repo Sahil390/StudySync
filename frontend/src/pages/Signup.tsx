@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "@/lib/api";
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,19 +17,33 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSignup = (e: React.FormEvent) => {
+
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Account Created!",
-      description: "Welcome to StudySync. Let's start learning!",
-    });
-    navigate("/dashboard");
+    try {
+      const { data } = await api.post('/auth/register', { name, email, password, role });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+
+      toast({
+        title: "Account Created!",
+        description: "Welcome to StudySync. Let's start learning!",
+      });
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Signup Failed",
+        description: error.response?.data?.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-20 relative overflow-hidden">
       <div className="absolute inset-0 gradient-secondary opacity-5"></div>
-      
+
       <Card className="w-full max-w-md glass animate-scale-in relative z-10">
         <CardHeader className="text-center">
           <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-glow">

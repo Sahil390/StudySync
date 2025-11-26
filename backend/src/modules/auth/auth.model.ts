@@ -29,15 +29,10 @@ const UserSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
-UserSchema.pre('save', async function (next: any) {
-    if (!this.isModified('password')) return next();
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password as string, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
+UserSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password as string, salt);
 });
 
 UserSchema.methods.comparePassword = async function (password: string) {

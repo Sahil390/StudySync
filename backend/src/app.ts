@@ -3,14 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-const app = express();
-
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
-
 // Routes
 import authRoutes from './modules/auth/auth.routes';
 import profileRoutes from './modules/profile/profile.routes';
@@ -22,6 +14,18 @@ import notificationRoutes from './modules/notifications/notifications.routes';
 import leaderboardRoutes from './modules/leaderboard/leaderboard.routes';
 import aiRoutes from './modules/ai/ai.routes';
 
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:8080'],
+    credentials: true
+}));
+app.use(helmet());
+app.use(morgan('dev'));
+
+// Route Registration
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/study-material', studyMaterialRoutes);
