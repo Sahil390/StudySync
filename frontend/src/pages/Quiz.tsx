@@ -1,12 +1,40 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Trophy, Target, TrendingUp } from "lucide-react";
+import { Clock, Trophy, Target, TrendingUp, Loader2 } from "lucide-react";
+import api from "@/lib/api";
 
 const Quiz = () => {
   const navigate = useNavigate();
+  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  const fetchQuizzes = async () => {
+    try {
+      const { data } = await api.get('/quiz');
+      setQuizzes(data);
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="gradient-secondary rounded-2xl p-8 text-white relative overflow-hidden">
@@ -17,7 +45,7 @@ const Quiz = () => {
         </div>
       </div>
 
-      {/* Performance Overview */}
+      {/* Performance Overview (Mock Data for now, can be connected to analytics later) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass">
           <CardContent className="p-6">
@@ -26,8 +54,8 @@ const Quiz = () => {
                 <Trophy className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Quizzes Completed</p>
-                <p className="text-2xl font-bold">32</p>
+                <p className="text-sm text-muted-foreground">Quizzes Available</p>
+                <p className="text-2xl font-bold">{quizzes.length}</p>
               </div>
             </div>
           </CardContent>
@@ -41,7 +69,7 @@ const Quiz = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Average Score</p>
-                <p className="text-2xl font-bold text-success">85%</p>
+                <p className="text-2xl font-bold text-success">-</p>
               </div>
             </div>
           </CardContent>
@@ -55,7 +83,7 @@ const Quiz = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Improvement</p>
-                <p className="text-2xl font-bold">+12%</p>
+                <p className="text-2xl font-bold">-</p>
               </div>
             </div>
           </CardContent>
@@ -68,350 +96,49 @@ const Quiz = () => {
           <CardTitle>Available Quizzes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {quizzes.map((quiz, index) => (
-            <div key={index} className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-lg">{quiz.title}</h3>
-                    <Badge variant={
-                      quiz.difficulty === "Hard" ? "destructive" : 
-                      quiz.difficulty === "Medium" ? "default" : 
-                      "secondary"
-                    }>
-                      {quiz.difficulty}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{quiz.subject} • {quiz.topics} topics</p>
-                  
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {quiz.duration}
+          {quizzes.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No quizzes available at the moment.</p>
+          ) : (
+            quizzes.map((quiz, index) => (
+              <div key={quiz._id || index} className="p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-lg">{quiz.title}</h3>
+                      <Badge variant="secondary">
+                        {quiz.subject}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Target className="h-4 w-4" />
-                      {quiz.questions} questions
+                    <p className="text-sm text-muted-foreground mb-3">{quiz.description}</p>
+                    
+                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        20 min {/* Placeholder duration */}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Target className="h-4 w-4" />
+                        {quiz.questions?.length || 0} questions
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col gap-2 min-w-[140px]">
-                  {quiz.completed ? (
-                    <>
-                      <div className="text-sm text-muted-foreground">Last Score: {quiz.lastScore}%</div>
-                      <Progress value={quiz.lastScore} className="h-2" />
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => navigate(`/test/${index}`)}
-                      >
-                        Retry
-                      </Button>
-                    </>
-                  ) : (
+                  <div className="flex flex-col gap-2 min-w-[140px]">
                     <Button 
                       className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      onClick={() => navigate(`/test/${index}`)}
+                      onClick={() => navigate(`/test/${quiz._id}`)}
                     >
                       Start Quiz
                     </Button>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Subject-wise Performance */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle>Subject-wise Performance</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {subjects.map((subject, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">{subject.name}</span>
-                <span className="text-sm text-muted-foreground">{subject.score}%</span>
-              </div>
-              <Progress value={subject.score} className="h-2" />
-            </div>
-          ))}
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
   );
 };
-
-const quizzes = [
-  // Mathematics
-  {
-    title: "Algebra Mastery Test",
-    subject: "Mathematics",
-    topics: 5,
-    difficulty: "Hard",
-    duration: "45 min",
-    questions: 30,
-    completed: true,
-    lastScore: 88,
-  },
-  {
-    title: "Trigonometry Complete",
-    subject: "Mathematics",
-    topics: 4,
-    difficulty: "Medium",
-    duration: "35 min",
-    questions: 25,
-    completed: true,
-    lastScore: 82,
-  },
-  {
-    title: "Coordinate Geometry",
-    subject: "Mathematics",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 20,
-    completed: false,
-  },
-  {
-    title: "Polynomials & Quadratics",
-    subject: "Mathematics",
-    topics: 4,
-    difficulty: "Hard",
-    duration: "40 min",
-    questions: 28,
-    completed: false,
-  },
-  {
-    title: "Statistics & Probability",
-    subject: "Mathematics",
-    topics: 3,
-    difficulty: "Easy",
-    duration: "25 min",
-    questions: 18,
-    completed: true,
-    lastScore: 90,
-  },
-  
-  // Physics
-  {
-    title: "Thermodynamics Quiz",
-    subject: "Physics",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 20,
-    completed: false,
-  },
-  {
-    title: "Newton's Laws & Motion",
-    subject: "Physics",
-    topics: 4,
-    difficulty: "Hard",
-    duration: "40 min",
-    questions: 25,
-    completed: true,
-    lastScore: 75,
-  },
-  {
-    title: "Electricity & Magnetism",
-    subject: "Physics",
-    topics: 5,
-    difficulty: "Hard",
-    duration: "45 min",
-    questions: 30,
-    completed: false,
-  },
-  {
-    title: "Light & Optics",
-    subject: "Physics",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 22,
-    completed: true,
-    lastScore: 85,
-  },
-  {
-    title: "Work, Energy & Power",
-    subject: "Physics",
-    topics: 2,
-    difficulty: "Easy",
-    duration: "25 min",
-    questions: 15,
-    completed: false,
-  },
-  
-  // Chemistry
-  {
-    title: "Organic Reactions",
-    subject: "Chemistry",
-    topics: 4,
-    difficulty: "Hard",
-    duration: "40 min",
-    questions: 25,
-    completed: true,
-    lastScore: 92,
-  },
-  {
-    title: "Chemical Bonding",
-    subject: "Chemistry",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 20,
-    completed: false,
-  },
-  {
-    title: "Acids, Bases & Salts",
-    subject: "Chemistry",
-    topics: 2,
-    difficulty: "Easy",
-    duration: "20 min",
-    questions: 15,
-    completed: true,
-    lastScore: 88,
-  },
-  {
-    title: "Periodic Table & Trends",
-    subject: "Chemistry",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "35 min",
-    questions: 23,
-    completed: false,
-  },
-  {
-    title: "Carbon & Compounds",
-    subject: "Chemistry",
-    topics: 5,
-    difficulty: "Hard",
-    duration: "45 min",
-    questions: 30,
-    completed: false,
-  },
-  
-  // Biology
-  {
-    title: "Cell Biology Basics",
-    subject: "Biology",
-    topics: 2,
-    difficulty: "Easy",
-    duration: "20 min",
-    questions: 15,
-    completed: false,
-  },
-  {
-    title: "Life Processes",
-    subject: "Biology",
-    topics: 4,
-    difficulty: "Medium",
-    duration: "35 min",
-    questions: 25,
-    completed: true,
-    lastScore: 86,
-  },
-  {
-    title: "Heredity & Evolution",
-    subject: "Biology",
-    topics: 3,
-    difficulty: "Hard",
-    duration: "40 min",
-    questions: 28,
-    completed: false,
-  },
-  {
-    title: "Human Reproduction",
-    subject: "Biology",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 20,
-    completed: true,
-    lastScore: 91,
-  },
-  {
-    title: "Control & Coordination",
-    subject: "Biology",
-    topics: 4,
-    difficulty: "Medium",
-    duration: "35 min",
-    questions: 24,
-    completed: false,
-  },
-  
-  // English
-  {
-    title: "Literature Comprehension",
-    subject: "English",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 20,
-    completed: true,
-    lastScore: 84,
-  },
-  {
-    title: "Grammar & Writing",
-    subject: "English",
-    topics: 5,
-    difficulty: "Hard",
-    duration: "40 min",
-    questions: 30,
-    completed: false,
-  },
-  
-  // Social Science
-  {
-    title: "History - Freedom Struggle",
-    subject: "Social Science",
-    topics: 4,
-    difficulty: "Medium",
-    duration: "35 min",
-    questions: 25,
-    completed: true,
-    lastScore: 80,
-  },
-  {
-    title: "Geography - Resources",
-    subject: "Social Science",
-    topics: 3,
-    difficulty: "Easy",
-    duration: "25 min",
-    questions: 18,
-    completed: false,
-  },
-  {
-    title: "Political Science - Democracy",
-    subject: "Social Science",
-    topics: 3,
-    difficulty: "Medium",
-    duration: "30 min",
-    questions: 22,
-    completed: false,
-  },
-  {
-    title: "Economics - Development",
-    subject: "Social Science",
-    topics: 2,
-    difficulty: "Easy",
-    duration: "20 min",
-    questions: 15,
-    completed: true,
-    lastScore: 87,
-  },
-];
-
-const subjects = [
-  { name: "Mathematics", score: 85 },
-  { name: "Physics", score: 78 },
-  { name: "Chemistry", score: 92 },
-  { name: "Biology", score: 88 },
-  { name: "English", score: 84 },
-  { name: "Social Science", score: 81 },
-];
 
 export default Quiz;

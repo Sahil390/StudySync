@@ -1,4 +1,5 @@
-import { Bell, Menu, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, Menu, User, Check, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -7,6 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import api from "@/lib/api";
+import { formatDistanceToNow } from "date-fns";
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -16,6 +25,54 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = false, showUserControls = true }: NavbarProps) => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (showUserControls) {
+      fetchNotifications();
+      // Poll for notifications every minute
+      const interval = setInterval(fetchNotifications, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [showUserControls]);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await api.get('/notifications');
+      setNotifications(data);
+      setUnreadCount(data.filter((n: any) => !n.isRead).length);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      // Ideally backend should have an endpoint for this, but for now loop or just refresh
+      // Assuming we implement a loop or a bulk update if backend supports it.
+      // For now, let's just optimistically update UI and maybe call read on unread ones.
+      const unreadIds = notifications.filter(n => !n.isRead).map(n => n._id);
+      await Promise.all(unreadIds.map(id => api.put(`/notifications/${id}/read`)));
+
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
       <div className="container mx-auto px-4">
@@ -65,16 +122,68 @@ export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = f
             >
               Forum
             </NavLink>
+            <NavLink
+              to="/leaderboard"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              activeClassName="text-primary"
+            >
+              Leaderboard
+            </NavLink>
           </div>
 
           <div className="flex items-center gap-2">
             {showUserControls && (
               <>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
-                </Button>
-                
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full animate-pulse"></span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0" align="end">
+                    <div className="flex items-center justify-between p-4 border-b">
+                      <h4 className="font-semibold">Notifications</h4>
+                      {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-auto p-1">
+                          Mark all read
+                        </Button>
+                      )}
+                    </div>
+                    <ScrollArea className="h-[300px]">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground text-sm">
+                          No notifications yet.
+                        </div>
+                      ) : (
+                        <div className="divide-y">
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification._id}
+                              className={`p-4 hover:bg-muted/50 transition-colors ${!notification.isRead ? 'bg-muted/20' : ''}`}
+                              onClick={() => !notification.isRead && markAsRead(notification._id)}
+                            >
+                              <div className="flex gap-3">
+                                <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead ? 'bg-primary' : 'bg-transparent'}`} />
+                                <div className="space-y-1">
+                                  <p className={`text-sm ${!notification.isRead ? 'font-medium' : 'text-muted-foreground'}`}>
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">

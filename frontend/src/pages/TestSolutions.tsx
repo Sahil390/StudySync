@@ -27,8 +27,8 @@ const TestSolutions = () => {
       </div>
 
       {questions.map((question: any, index: number) => {
-        const userAnswer = answers[index];
-        const isCorrect = userAnswer === question.correct;
+        const userAnswerIndex = answers[index];
+        const isCorrect = userAnswerIndex === question.correctOption;
 
         return (
           <Card key={index} className="glass">
@@ -53,7 +53,7 @@ const TestSolutions = () => {
             <CardContent className="space-y-6">
               {/* Question */}
               <div>
-                <p className="text-lg font-medium mb-4">{question.question}</p>
+                <p className="text-lg font-medium mb-4">{question.questionText}</p>
               </div>
 
               <Separator />
@@ -63,19 +63,18 @@ const TestSolutions = () => {
                 <p className="font-semibold mb-3">Options:</p>
                 <div className="space-y-2">
                   {question.options.map((option: string, optIndex: number) => {
-                    const isUserAnswer = option === userAnswer;
-                    const isCorrectAnswer = option === question.correct;
-                    
+                    const isUserAnswer = optIndex === userAnswerIndex;
+                    const isCorrectAnswer = optIndex === question.correctOption;
+
                     return (
                       <div
                         key={optIndex}
-                        className={`p-3 rounded-lg border-2 ${
-                          isCorrectAnswer
+                        className={`p-3 rounded-lg border-2 ${isCorrectAnswer
                             ? 'border-success bg-success/10'
                             : isUserAnswer
-                            ? 'border-destructive bg-destructive/10'
-                            : 'border-border bg-muted/30'
-                        }`}
+                              ? 'border-destructive bg-destructive/10'
+                              : 'border-border bg-muted/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span>{option}</span>
@@ -97,11 +96,10 @@ const TestSolutions = () => {
               {/* Your Answer */}
               <div>
                 <p className="font-semibold mb-2">Your Answer:</p>
-                <div className={`p-3 rounded-lg ${
-                  isCorrect ? 'bg-success/10 border border-success' : 'bg-destructive/10 border border-destructive'
-                }`}>
+                <div className={`p-3 rounded-lg ${isCorrect ? 'bg-success/10 border border-success' : 'bg-destructive/10 border border-destructive'
+                  }`}>
                   <p className={isCorrect ? 'text-success' : 'text-destructive'}>
-                    {userAnswer || "Not answered"}
+                    {userAnswerIndex !== undefined ? question.options[userAnswerIndex] : "Not answered"}
                   </p>
                 </div>
               </div>
@@ -110,7 +108,7 @@ const TestSolutions = () => {
                 <div>
                   <p className="font-semibold mb-2">Correct Answer:</p>
                   <div className="p-3 rounded-lg bg-success/10 border border-success">
-                    <p className="text-success">{question.correct}</p>
+                    <p className="text-success">{question.options[question.correctOption]}</p>
                   </div>
                 </div>
               )}
@@ -124,7 +122,7 @@ const TestSolutions = () => {
                   <div>
                     <p className="font-semibold mb-2">Explanation:</p>
                     <p className="text-muted-foreground leading-relaxed">
-                      {question.explanation}
+                      {question.explanation || "No explanation provided."}
                     </p>
                   </div>
                 </div>

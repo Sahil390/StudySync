@@ -5,74 +5,92 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import api from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const TestSimulation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [quiz, setQuiz] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
+  const [answers, setAnswers] = useState<Record<number, number>>({}); // Store index of selected option
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // Default 30 mins
   const [isFinished, setIsFinished] = useState(false);
 
-  const questions = [
-    {
-      question: "What is the general form of a quadratic equation?",
-      options: ["ax + b = 0", "ax² + bx + c = 0", "ax³ + bx² + cx + d = 0", "ax² + b = 0"],
-      correct: "ax² + bx + c = 0",
-      explanation: "A quadratic equation is a second-degree polynomial equation in a single variable. The general form is ax² + bx + c = 0, where a ≠ 0."
-    },
-    {
-      question: "If the discriminant (b² - 4ac) is positive, the quadratic equation has:",
-      options: ["No real roots", "One real root", "Two distinct real roots", "Two complex roots"],
-      correct: "Two distinct real roots",
-      explanation: "When the discriminant is positive (b² - 4ac > 0), the quadratic equation has two distinct real roots."
-    },
-    {
-      question: "The axis of symmetry of a parabola y = ax² + bx + c is given by:",
-      options: ["x = -b/a", "x = -b/2a", "x = b/2a", "x = -2b/a"],
-      correct: "x = -b/2a",
-      explanation: "The axis of symmetry of a parabola in standard form passes through the vertex and is given by x = -b/2a."
-    },
-    {
-      question: "What is the sum of the roots of the equation 2x² - 5x + 3 = 0?",
-      options: ["5/2", "-5/2", "3/2", "-3/2"],
-      correct: "5/2",
-      explanation: "For a quadratic equation ax² + bx + c = 0, the sum of roots is -b/a. Here, -(-5)/2 = 5/2."
-    },
-    {
-      question: "Which method is most efficient for solving x² - 16 = 0?",
-      options: ["Quadratic formula", "Completing the square", "Factorization", "Graphing"],
-      correct: "Factorization",
-      explanation: "x² - 16 = 0 is a difference of squares that can be easily factored as (x + 4)(x - 4) = 0, making factorization the most efficient method."
-    },
-  ];
+  useEffect(() => {
+    if (id) {
+      fetchQuizDetails();
+    }
+  }, [id]);
+
+  const fetchQuizDetails = async () => {
+    try {
+      const { data } = await api.get(`/quiz/${id}`);
+      setQuiz(data);
+      // Set duration from quiz data if available, else default to 30 mins
+      // Assuming quiz.duration is in minutes string like "30 min" or number
+      const duration = parseInt(data.duration) || 30;
+      setTimeRemaining(duration * 60);
+    } catch (error) {
+      console.error("Error fetching quiz:", error);
+      toast({
+        title: "Error",
+        description: "Could not load quiz details.",
+        variant: "destructive",
+      });
+      navigate('/quiz');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (timeRemaining > 0 && !isFinished) {
+    if (timeRemaining > 0 && !isFinished && !loading) {
       const timer = setTimeout(() => setTimeRemaining(timeRemaining - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (timeRemaining === 0 && !isFinished) {
+    } else if (timeRemaining === 0 && !isFinished && !loading) {
       handleSubmit();
     }
-  }, [timeRemaining, isFinished]);
+  }, [timeRemaining, isFinished, loading]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsFinished(true);
-    const score = Object.entries(answers).filter(
-      ([index, answer]) => answer === questions[parseInt(index)].correct
-    ).length;
-    
-    navigate(`/test-results/${id}`, { 
-      state: { 
-        answers, 
-        questions, 
-        score,
-        totalQuestions: questions.length,
-        timeTaken: (30 * 60) - timeRemaining
-      } 
-    });
+
+    try {
+      // Format answers for backend: { questionIndex, selectedOption }
+      const formattedAnswers = Object.entries(answers).map(([qIndex, optIndex]) => ({
+        questionIndex: parseInt(qIndex),
+        selectedOption: optIndex
+      }));
+
+      const { data } = await api.post('/quiz/attempt', {
+        quizId: id,
+        answers: formattedAnswers
+      });
+
+      navigate(`/test-results/${id}`, {
+        state: {
+          result: data,
+          quiz: quiz,
+          answers: answers,
+          timeTaken: (parseInt(quiz.duration || 30) * 60) - timeRemaining
+        }
+      });
+
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Could not submit your quiz. Please try again.",
+        variant: "destructive",
+      });
+      setIsFinished(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -81,6 +99,19 @@ const TestSimulation = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+    return <div className="text-center p-8">Quiz not found or has no questions.</div>;
+  }
+
+  const questions = quiz.questions;
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const isTimeCritical = timeRemaining < 300; // Less than 5 minutes
 
@@ -119,21 +150,21 @@ const TestSimulation = () => {
           <CardTitle className="text-xl">Question {currentQuestion + 1}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-lg">{questions[currentQuestion].question}</p>
+          <p className="text-lg">{questions[currentQuestion].questionText}</p>
 
           <RadioGroup
-            value={answers[currentQuestion] || ""}
+            value={answers[currentQuestion]?.toString() || ""}
             onValueChange={(value) =>
-              setAnswers({ ...answers, [currentQuestion]: value })
+              setAnswers({ ...answers, [currentQuestion]: parseInt(value) })
             }
           >
             <div className="space-y-3">
-              {questions[currentQuestion].options.map((option, index) => (
+              {questions[currentQuestion].options.map((option: string, index: number) => (
                 <div
                   key={index}
                   className="flex items-center space-x-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
                 >
-                  <RadioGroupItem value={option} id={`option-${index}`} />
+                  <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                   <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
                     {option}
                   </Label>
@@ -150,7 +181,7 @@ const TestSimulation = () => {
             >
               Previous
             </Button>
-            
+
             {currentQuestion === questions.length - 1 ? (
               <Button onClick={handleSubmit}>
                 Submit Test
@@ -171,12 +202,12 @@ const TestSimulation = () => {
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground mb-3">Question Navigator</p>
           <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-            {questions.map((_, index) => (
+            {questions.map((_: any, index: number) => (
               <Button
                 key={index}
                 variant={index === currentQuestion ? "default" : "outline"}
                 size="sm"
-                className={`h-10 ${answers[index] ? 'bg-success/20 hover:bg-success/30' : ''}`}
+                className={`h-10 ${answers[index] !== undefined ? 'bg-success/20 hover:bg-success/30' : ''}`}
                 onClick={() => setCurrentQuestion(index)}
               >
                 {index + 1}

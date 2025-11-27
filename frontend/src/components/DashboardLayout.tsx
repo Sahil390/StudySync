@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Outlet } from "react-router-dom";
+import { AIChatWidget } from "@/components/AIChatWidget";
 
 export const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +14,7 @@ export const DashboardLayout = () => {
           <Outlet />
         </div>
       </div>
+      <AIChatWidget />
     </div>
   );
 };

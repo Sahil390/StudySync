@@ -97,3 +97,61 @@ export const attemptQuiz = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: (error as Error).message });
     }
 };
+
+export const seedQuiz = async (req: Request, res: Response) => {
+    try {
+        const user = await User.findOne();
+        if (!user) {
+            return res.status(404).json({ message: 'No user found to assign as creator' });
+        }
+
+        const sampleQuiz = {
+            title: "General Science Knowledge",
+            description: "A quick test of your basic science knowledge.",
+            board: "CBSE",
+            grade: "10",
+            subject: "Science",
+            chapter: "General",
+            topic: "Basics",
+            questions: [
+                {
+                    questionText: "What is the chemical symbol for Gold?",
+                    options: ["Ag", "Au", "Fe", "Cu"],
+                    correctOption: 1,
+                    explanation: "Au is the symbol for Gold, derived from the Latin word Aurum."
+                },
+                {
+                    questionText: "Which planet is known as the Red Planet?",
+                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                    correctOption: 1,
+                    explanation: "Mars is often called the Red Planet because the iron oxide prevalent on its surface gives it a reddish appearance."
+                },
+                {
+                    questionText: "What is the powerhouse of the cell?",
+                    options: ["Nucleus", "Mitochondria", "Ribosome", "Golgi Apparatus"],
+                    correctOption: 1,
+                    explanation: "Mitochondria are known as the powerhouses of the cell because they generate most of the cell's supply of adenosine triphosphate (ATP)."
+                },
+                {
+                    questionText: "What is the speed of light?",
+                    options: ["3 x 10^8 m/s", "3 x 10^6 m/s", "3 x 10^5 km/s", "Both A and C"],
+                    correctOption: 3,
+                    explanation: "The speed of light is approximately 3 x 10^8 meters per second, which is equal to 3 x 10^5 kilometers per second."
+                },
+                {
+                    questionText: "Which gas is most abundant in the Earth's atmosphere?",
+                    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+                    correctOption: 2,
+                    explanation: "Nitrogen makes up about 78% of Earth's atmosphere."
+                }
+            ],
+            createdBy: user._id as any,
+            duration: "10"
+        };
+
+        const createdQuiz = await Quiz.create(sampleQuiz);
+        res.status(201).json(createdQuiz);
+    } catch (error) {
+        res.status(500).json({ message: (error as Error).message });
+    }
+};

@@ -9,15 +9,19 @@ const TestResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const { answers, questions, score, totalQuestions, timeTaken } = location.state || {
+
+  // Destructure with default values to prevent crashes
+  const { answers, quiz, score, totalQuestions, timeTaken } = location.state || {
     answers: {},
-    questions: [],
+    quiz: { questions: [] },
     score: 0,
     totalQuestions: 0,
     timeTaken: 0
   };
 
-  const percentage = Math.round((score / totalQuestions) * 100);
+  const questions = quiz?.questions || [];
+  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -84,15 +88,14 @@ const TestResults = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {questions.map((question: any, index: number) => {
-            const userAnswer = answers[index];
-            const isCorrect = userAnswer === question.correct;
-            
+            const userAnswerIndex = answers[index];
+            const isCorrect = userAnswerIndex === question.correctOption;
+
             return (
               <div
                 key={index}
-                className={`p-4 rounded-lg border-2 ${
-                  isCorrect ? 'border-success/50 bg-success/10' : 'border-destructive/50 bg-destructive/10'
-                }`}
+                className={`p-4 rounded-lg border-2 ${isCorrect ? 'border-success/50 bg-success/10' : 'border-destructive/50 bg-destructive/10'
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   {isCorrect ? (
@@ -102,15 +105,19 @@ const TestResults = () => {
                   )}
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-medium">Q{index + 1}. {question.question}</p>
+                      <p className="font-medium">Q{index + 1}. {question.questionText}</p>
                       <Badge variant={isCorrect ? "default" : "destructive"}>
                         {isCorrect ? "Correct" : "Incorrect"}
                       </Badge>
                     </div>
                     {!isCorrect && (
                       <div className="space-y-1 text-sm">
-                        <p className="text-destructive">Your answer: {userAnswer || "Not answered"}</p>
-                        <p className="text-success">Correct answer: {question.correct}</p>
+                        <p className="text-destructive">
+                          Your answer: {userAnswerIndex !== undefined ? question.options[userAnswerIndex] : "Not answered"}
+                        </p>
+                        <p className="text-success">
+                          Correct answer: {question.options[question.correctOption]}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -129,13 +136,6 @@ const TestResults = () => {
           onClick={() => navigate(`/test/${id}`)}
         >
           Retry Test
-        </Button>
-        <Button
-          size="lg"
-          onClick={() => navigate(`/test-solutions/${id}`, { state: { answers, questions } })}
-        >
-          <BookOpen className="h-5 w-5 mr-2" />
-          View Solutions
         </Button>
         <Button
           size="lg"

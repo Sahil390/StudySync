@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState({ xp: 0, streak: 0, completed: 0, rank: 0 });
+  const [subjectAnalytics, setSubjectAnalytics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -51,6 +52,8 @@ const Profile = () => {
         rank: myRank > 0 ? myRank : '-',
       });
 
+      setSubjectAnalytics(analytics.subjectAnalytics || []);
+
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -67,6 +70,7 @@ const Profile = () => {
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
+        variant: "default",
       });
     } catch (error) {
       toast({
@@ -231,8 +235,20 @@ const Profile = () => {
               Subject Progress
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-center py-8">Take quizzes to see subject progress!</p>
+          <CardContent className="space-y-6">
+            {subjectAnalytics.length > 0 ? (
+              subjectAnalytics.map((subject: any, index: number) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium">{subject.subject}</span>
+                    <span className="text-muted-foreground">{Math.round(subject.accuracy)}%</span>
+                  </div>
+                  <Progress value={subject.accuracy} className="h-2" />
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center py-8">Take quizzes to see subject progress!</p>
+            )}
           </CardContent>
         </Card>
       </div>
