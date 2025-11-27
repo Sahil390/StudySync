@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { StudyMaterial } from './studyMaterial.model';
+import { notifyAllStudents } from '../notifications/notifications.controller';
 import { AuthRequest } from '../../middleware/auth.middleware';
 import cloudinary from '../../config/cloudinary';
 import fs from 'fs';
@@ -46,6 +47,9 @@ export const createStudyMaterial = async (req: AuthRequest, res: Response) => {
             tags: tags ? tags.split(',') : [],
             uploadedBy: req.user._id,
         });
+
+        // Notify all students
+        await notifyAllStudents(`New Study Material: ${title} (${subject})`, 'info');
 
         res.status(201).json(material);
     } catch (error) {

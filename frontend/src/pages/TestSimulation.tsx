@@ -78,6 +78,8 @@ const TestSimulation = () => {
           result: data,
           quiz: quiz,
           answers: answers,
+          score: data.score,
+          totalQuestions: data.totalQuestions,
           timeTaken: (parseInt(quiz.duration || 30) * 60) - timeRemaining
         }
       });

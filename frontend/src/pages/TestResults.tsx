@@ -133,7 +133,7 @@ const TestResults = () => {
         <Button
           size="lg"
           variant="outline"
-          onClick={() => navigate(`/test/${id}`)}
+          onClick={() => navigate(`/test-simulation/${id}`)}
         >
           Retry Test
         </Button>

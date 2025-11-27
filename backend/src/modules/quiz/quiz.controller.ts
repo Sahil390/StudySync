@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { Quiz, QuizAttempt } from './quiz.model';
+import { notifyAllStudents } from '../notifications/notifications.controller';
 import { AuthRequest } from '../../middleware/auth.middleware';
 import { User } from '../auth/auth.model';
 
 export const createQuiz = async (req: AuthRequest, res: Response) => {
     try {
-        const { title, description, board, grade, subject, chapter, topic, questions } = req.body;
+        const { title, description, board, grade, subject, chapter, topic, duration, questions } = req.body;
 
         const quiz = await Quiz.create({
             title,
@@ -15,9 +16,13 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
             subject,
             chapter,
             topic,
+            duration: duration || 20,
             questions,
             createdBy: req.user._id,
         });
+
+        // Notify all students
+        await notifyAllStudents(`New Quiz: ${title} (${subject})`, 'alert');
 
         res.status(201).json(quiz);
     } catch (error) {
@@ -146,7 +151,7 @@ export const seedQuiz = async (req: Request, res: Response) => {
                 }
             ],
             createdBy: user._id as any,
-            duration: "10"
+            duration: 10
         };
 
         const createdQuiz = await Quiz.create(sampleQuiz);

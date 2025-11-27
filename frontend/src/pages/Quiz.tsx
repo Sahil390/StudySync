@@ -110,7 +110,7 @@ const Quiz = () => {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{quiz.description}</p>
-                    
+
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
@@ -124,9 +124,9 @@ const Quiz = () => {
                   </div>
 
                   <div className="flex flex-col gap-2 min-w-[140px]">
-                    <Button 
+                    <Button
                       className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      onClick={() => navigate(`/test/${quiz._id}`)}
+                      onClick={() => navigate(`/test-simulation/${quiz._id}`)}
                     >
                       Start Quiz
                     </Button>

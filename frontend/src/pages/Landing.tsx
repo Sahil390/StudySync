@@ -18,7 +18,7 @@ const Landing = () => {
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Your personalized learning companion. Master any subject with adaptive quizzes,
-              interactive study materials, and AI-powered doubt solving.
+              and interactive study materials.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <NavLink to="/signup">
@@ -102,11 +102,7 @@ const features = [
     title: "Comprehensive Study Materials",
     description: "Access organized notes, PDFs, and videos for every subject and topic.",
   },
-  {
-    icon: Brain,
-    title: "AI-Powered Doubt Solving",
-    description: "Get instant answers to your questions with our intelligent chatbot.",
-  },
+
   {
     icon: Zap,
     title: "Adaptive Quizzes",

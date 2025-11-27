@@ -15,6 +15,7 @@ export interface IQuiz extends Document {
     subject: string;
     chapter: string;
     topic: string;
+    duration: number;
     questions: IQuestion[];
     createdBy: mongoose.Schema.Types.ObjectId;
 }
@@ -28,6 +29,7 @@ const QuizSchema: Schema = new Schema(
         subject: { type: String, required: true },
         chapter: { type: String, required: true },
         topic: { type: String, required: true },
+        duration: { type: Number, default: 20 },
         questions: [
             {
                 questionText: { type: String, required: true },

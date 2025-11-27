@@ -27,6 +27,8 @@ const AdminQuiz = () => {
         subject: "",
         grade: "11",
         chapter: "",
+        topic: "",
+        board: "CBSE",
         timeLimit: 20,
     });
 
@@ -58,7 +60,7 @@ const AdminQuiz = () => {
 
     const handleSubmit = async () => {
         // Validation
-        if (!quizData.title || !quizData.subject || !quizData.chapter) {
+        if (!quizData.title || !quizData.subject || !quizData.chapter || !quizData.topic || !quizData.board) {
             toast({
                 title: "Missing Information",
                 description: "Please fill in all quiz details.",
@@ -82,6 +84,7 @@ const AdminQuiz = () => {
         try {
             await api.post("/quiz", {
                 ...quizData,
+                duration: quizData.timeLimit,
                 questions
             });
 
@@ -135,6 +138,34 @@ const AdminQuiz = () => {
                                 onChange={(e) => setQuizData({ ...quizData, title: e.target.value })}
                                 className="bg-slate-950 border-slate-800"
                             />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Board</Label>
+                                <Select
+                                    value={quizData.board}
+                                    onValueChange={(val) => setQuizData({ ...quizData, board: val })}
+                                >
+                                    <SelectTrigger className="bg-slate-950 border-slate-800">
+                                        <SelectValue placeholder="Select Board" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="CBSE">CBSE</SelectItem>
+                                        <SelectItem value="ICSE">ICSE</SelectItem>
+                                        <SelectItem value="State Board">State Board</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Topic</Label>
+                                <Input
+                                    placeholder="e.g., Laws of Thermodynamics"
+                                    value={quizData.topic}
+                                    onChange={(e) => setQuizData({ ...quizData, topic: e.target.value })}
+                                    className="bg-slate-950 border-slate-800"
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -244,8 +275,8 @@ const AdminQuiz = () => {
                                         <div key={oIndex} className="flex items-center gap-2">
                                             <div
                                                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${q.correctOption === oIndex
-                                                        ? "border-green-500 bg-green-500/20 text-green-500"
-                                                        : "border-slate-600 hover:border-slate-400"
+                                                    ? "border-green-500 bg-green-500/20 text-green-500"
+                                                    : "border-slate-600 hover:border-slate-400"
                                                     }`}
                                                 onClick={() => updateQuestion(qIndex, "correctOption", oIndex)}
                                             >

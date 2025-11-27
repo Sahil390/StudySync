@@ -12,7 +12,7 @@ import forumRoutes from './modules/forum/forum.routes';
 import analyticsRoutes from './modules/analytics/analytics.routes';
 import notificationRoutes from './modules/notifications/notifications.routes';
 import leaderboardRoutes from './modules/leaderboard/leaderboard.routes';
-import aiRoutes from './modules/ai/ai.routes';
+
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
-app.use('/api/ai', aiRoutes);
+
 
 app.get('/', (req, res) => {
     res.send('StudySync API is running...');
