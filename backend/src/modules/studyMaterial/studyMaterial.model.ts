@@ -3,8 +3,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IStudyMaterial extends Document {
     title: string;
     description: string;
-    type: 'pdf' | 'youtube' | 'link';
-    url: string;
+    content?: string;
+    type: 'pdf' | 'youtube' | 'link' | 'topic';
+    url?: string;
+    pdfs?: { title: string; url: string }[];
+    videos?: { title: string; url: string }[];
     board: string;
     grade: string;
     subject: string;
@@ -19,8 +22,17 @@ const StudyMaterialSchema: Schema = new Schema(
     {
         title: { type: String, required: true },
         description: { type: String },
-        type: { type: String, enum: ['pdf', 'youtube', 'link'], required: true },
-        url: { type: String, required: true },
+        content: { type: String }, // Rich text HTML content
+        type: { type: String, enum: ['pdf', 'youtube', 'link', 'topic'], default: 'topic' },
+        url: { type: String }, // Kept for backward compatibility
+        pdfs: [{
+            title: { type: String },
+            url: { type: String }
+        }],
+        videos: [{
+            title: { type: String },
+            url: { type: String }
+        }],
         board: { type: String, required: true },
         grade: { type: String, required: true },
         subject: { type: String, required: true },

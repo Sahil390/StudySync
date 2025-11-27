@@ -28,7 +28,7 @@ app.use(morgan('dev'));
 // Route Registration
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/study-material', studyMaterialRoutes);
+app.use('/api/study-materials', studyMaterialRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/analytics', analyticsRoutes);

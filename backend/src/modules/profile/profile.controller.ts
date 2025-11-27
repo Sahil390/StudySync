@@ -17,6 +17,8 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
+        console.log("Update Profile Request:", req.body);
+        console.log("User ID:", req.user._id);
         const user = await User.findById(req.user._id);
 
         if (user) {

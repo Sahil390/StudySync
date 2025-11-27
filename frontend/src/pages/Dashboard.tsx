@@ -7,8 +7,10 @@ import { BookOpen, Trophy, Zap, Clock, TrendingUp, Target, Bell } from "lucide-r
 import { NavLink } from "@/components/NavLink";
 import api from "@/lib/api";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [stats, setStats] = useState({ xp: 0, streak: 0, completed: 0, rank: 0 });
   const [subjects, setSubjects] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
@@ -18,12 +20,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get User Data
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const userData = JSON.parse(userStr);
-          setUser(userData);
-        }
+        if (!user) return; // Wait for user to be loaded
+
 
         // Fetch Analytics
         const { data: analytics } = await api.get('/analytics');
@@ -66,8 +64,12 @@ const Dashboard = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (user) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   if (loading) {
     return <div className="p-8 text-center">Loading dashboard...</div>;

@@ -1,13 +1,14 @@
 import express from 'express';
-import { createStudyMaterial, getStudyMaterials, getStudyMaterialById, deleteStudyMaterial } from './studyMaterial.controller';
+import { createStudyMaterial, getStudyMaterials, getStudyMaterialById, deleteStudyMaterial, updateStudyMaterial } from './studyMaterial.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 import upload from '../../middleware/upload.middleware';
 
 const router = express.Router();
 
-router.post('/', protect, authorize('teacher', 'admin'), upload.single('file'), createStudyMaterial);
+router.post('/', protect, authorize('admin'), upload.array('pdfs', 10), createStudyMaterial);
 router.get('/', getStudyMaterials);
 router.get('/:id', getStudyMaterialById);
-router.delete('/:id', protect, authorize('teacher', 'admin'), deleteStudyMaterial);
+router.put('/:id', protect, authorize('admin'), upload.array('pdfs', 10), updateStudyMaterial);
+router.delete('/:id', protect, authorize('admin'), deleteStudyMaterial);
 
 export default router;

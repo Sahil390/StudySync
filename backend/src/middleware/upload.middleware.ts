@@ -1,35 +1,41 @@
 import multer from 'multer';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import dotenv from 'dotenv';
 
-const storage = multer.diskStorage({
-    filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    },
+dotenv.config();
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const checkFileType = (file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    const filetypes = /pdf/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'studysync',
+        resource_type: 'auto',
+        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+    } as any,
+});
 
-    if (extname && mimetype) {
-        return cb(null, true);
+const fileFilter = (req: any, file: any, cb: any) => {
+    if (file.mimetype === 'application/pdf' ||
+        file.mimetype === 'image/jpeg' ||
+        file.mimetype === 'image/png') {
+        cb(null, true);
     } else {
-        cb(new Error('Images only!')); // Wait, requirements say PDF. Error message should say PDF only.
+        cb(new Error('Invalid file type, only PDF and Images are allowed!'), false);
     }
 };
 
 const upload = multer({
-    storage,
-    fileFilter: function (req, file, cb) {
-        // Allow PDFs
-        if (file.mimetype === 'application/pdf') {
-            cb(null, true);
-        } else {
-            cb(null, false);
-            return cb(new Error('Only .pdf format allowed!'));
-        }
-    },
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
 });
 
 export default upload;

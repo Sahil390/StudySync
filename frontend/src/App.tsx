@@ -21,8 +21,27 @@ import ForumPost from "./pages/ForumPost";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { AdminLayout } from "./components/AdminLayout";
+import AdminUpload from "./pages/AdminUpload";
+import AdminMaterials from "./pages/AdminMaterials";
+import AdminQuiz from "./pages/AdminQuiz";
+import { AdminGate } from "./components/AdminGate";
+import { useAuth } from "./hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,9 +50,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<><Navbar /><Landing /></>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<PublicRoute><><Navbar /><Landing /></></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -47,6 +66,16 @@ const App = () => (
               <Route path="/forum/:id" element={<ForumPost />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<Profile />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route element={<AdminGate />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin/upload" element={<AdminUpload />} />
+                <Route path="/admin/materials" element={<AdminMaterials />} />
+                <Route path="/admin/edit/:id" element={<AdminUpload />} />
+                <Route path="/admin/quiz/create" element={<AdminQuiz />} />
+              </Route>
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

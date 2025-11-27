@@ -24,7 +24,10 @@ interface NavbarProps {
   showUserControls?: boolean;
 }
 
+import { useAuth } from "@/hooks/useAuth";
+
 export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = false, showUserControls = true }: NavbarProps) => {
+  const { logout } = useAuth();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -194,8 +197,8 @@ export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = f
                     <DropdownMenuItem>
                       <NavLink to="/profile" className="w-full">Profile</NavLink>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <NavLink to="/login" className="w-full">Logout</NavLink>
+                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-500">
+                      Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

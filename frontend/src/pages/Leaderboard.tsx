@@ -6,7 +6,10 @@ import { Trophy, Medal, Crown, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const Leaderboard = () => {
+    const { user } = useAuth();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();

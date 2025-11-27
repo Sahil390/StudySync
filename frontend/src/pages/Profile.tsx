@@ -11,8 +11,11 @@ import { Trophy, Zap, Target, BookOpen, Award, Edit2 } from "lucide-react";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const Profile = () => {
-  const [user, setUser] = useState<any>(null);
+  const { user, updateUser } = useAuth();
+  const [localUser, setLocalUser] = useState<any>(null);
   const [stats, setStats] = useState({ xp: 0, streak: 0, completed: 0, rank: 0 });
   const [subjectAnalytics, setSubjectAnalytics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,13 +30,21 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    fetchProfileData();
-  }, []);
+    if (user) {
+      setLocalUser(user);
+      fetchProfileData();
+    }
+  }, [user]);
 
   const fetchProfileData = async () => {
     try {
       const { data: userData } = await api.get('/auth/me');
-      setUser(userData);
+
+      // Sync auth state if needed
+      if (user && JSON.stringify(userData) !== JSON.stringify(user)) {
+        updateUser(userData);
+      }
+
       setEditForm({
         name: userData.name,
         grade: userData.grade || "",
@@ -65,17 +76,19 @@ const Profile = () => {
     e.preventDefault();
     try {
       const { data } = await api.put('/profile', editForm);
-      setUser(data);
+      updateUser(data);
+      setLocalUser(data);
       setIsEditing(false);
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
         variant: "default",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Profile Update Error:", error);
       toast({
         title: "Update Failed",
-        description: "Could not update profile. Please try again.",
+        description: error.response?.data?.message || "Could not update profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -92,12 +105,12 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row items-center gap-6">
             <Avatar className="h-24 w-24 border-4 border-white/20">
               <AvatarFallback className="text-3xl bg-white/20 text-white">
-                {user?.name?.charAt(0).toUpperCase()}
+                {localUser?.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="text-center md:text-left flex-1">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{user?.name}</h1>
+                <h1 className="text-3xl font-bold">{localUser?.name}</h1>
                 <Dialog open={isEditing} onOpenChange={setIsEditing}>
                   <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/20">

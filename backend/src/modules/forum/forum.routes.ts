@@ -9,6 +9,6 @@ router.get('/', getQuestions);
 router.get('/:id', getQuestionById);
 router.post('/:id/answers', protect, addAnswer);
 router.put('/:questionId/answers/:answerId/upvote', protect, upvoteAnswer);
-router.put('/:questionId/answers/:answerId/verify', protect, authorize('teacher', 'admin'), verifyAnswer);
+router.put('/:questionId/answers/:answerId/verify', protect, authorize('admin'), verifyAnswer);
 
 export default router;
