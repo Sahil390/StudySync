@@ -17,6 +17,7 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
             chapter,
             topic,
             duration: duration || 20,
+            maxAttempts: req.body.maxAttempts || null,
             questions,
             createdBy: req.user._id,
         });
@@ -70,6 +71,14 @@ export const attemptQuiz = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: 'Quiz not found' });
         }
 
+        // Check Max Attempts
+        if (quiz.maxAttempts) {
+            const previousAttempts = await QuizAttempt.countDocuments({ student: req.user._id, quiz: quizId });
+            if (previousAttempts >= quiz.maxAttempts) {
+                return res.status(403).json({ message: `Maximum attempts (${quiz.maxAttempts}) reached for this quiz.` });
+            }
+        }
+
         let score = 0;
         const processedAnswers = answers.map((ans: any) => {
             const question = quiz.questions[ans.questionIndex];
@@ -90,14 +99,37 @@ export const attemptQuiz = async (req: AuthRequest, res: Response) => {
             answers: processedAnswers,
         });
 
+        const xpGained = score * 10;
+        console.log(`[Quiz Attempt] User: ${req.user._id}, Score: ${score}, XP Gained: ${xpGained}`);
+
         // Update User XP
         const user = await User.findById(req.user._id);
         if (user) {
-            user.xp += score * 10; // 10 XP per correct answer
+            if (typeof user.xp !== 'number' || isNaN(user.xp)) {
+                console.log(`[Quiz Attempt] Initializing XP for user ${user._id}`);
+                user.xp = 0;
+            }
+            const oldXp = user.xp;
+            user.xp += xpGained;
             await user.save();
+            console.log(`[Quiz Attempt] XP Updated: ${oldXp} -> ${user.xp}`);
+        } else {
+            console.error(`[Quiz Attempt] User not found: ${req.user._id}`);
         }
 
-        res.status(201).json(attempt);
+        res.status(201).json({ ...attempt.toObject(), xpGained });
+    } catch (error) {
+        res.status(500).json({ message: (error as Error).message });
+    }
+};
+
+export const getAllQuizAttempts = async (req: Request, res: Response) => {
+    try {
+        const attempts = await QuizAttempt.find()
+            .populate('student', 'name email username')
+            .populate('quiz', 'title subject grade')
+            .sort({ completedAt: -1 });
+        res.json(attempts);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }
@@ -156,6 +188,56 @@ export const seedQuiz = async (req: Request, res: Response) => {
 
         const createdQuiz = await Quiz.create(sampleQuiz);
         res.status(201).json(createdQuiz);
+    } catch (error) {
+        res.status(500).json({ message: (error as Error).message });
+    }
+};
+
+export const updateQuiz = async (req: AuthRequest, res: Response) => {
+    try {
+        const { title, description, board, grade, subject, chapter, topic, duration, maxAttempts, questions } = req.body;
+        const quiz = await Quiz.findById(req.params.id);
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found' });
+        }
+
+        if (quiz.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to update this quiz' });
+        }
+
+        quiz.title = title || quiz.title;
+        quiz.description = description || quiz.description;
+        quiz.board = board || quiz.board;
+        quiz.grade = grade || quiz.grade;
+        quiz.subject = subject || quiz.subject;
+        quiz.chapter = chapter || quiz.chapter;
+        quiz.topic = topic || quiz.topic;
+        quiz.duration = duration || quiz.duration;
+        quiz.maxAttempts = maxAttempts !== undefined ? maxAttempts : quiz.maxAttempts;
+        quiz.questions = questions || quiz.questions;
+
+        await quiz.save();
+        res.json(quiz);
+    } catch (error) {
+        res.status(500).json({ message: (error as Error).message });
+    }
+};
+
+export const deleteQuiz = async (req: AuthRequest, res: Response) => {
+    try {
+        const quiz = await Quiz.findById(req.params.id);
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found' });
+        }
+
+        if (quiz.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this quiz' });
+        }
+
+        await quiz.deleteOne();
+        res.json({ message: 'Quiz removed' });
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }

@@ -10,18 +10,27 @@ import api from "@/lib/api";
 const Quiz = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [stats, setStats] = useState({ averageAccuracy: 0, improvement: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchQuizzes();
+    fetchData();
   }, []);
 
-  const fetchQuizzes = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await api.get('/quiz');
-      setQuizzes(data);
+      const [quizRes, analyticsRes] = await Promise.all([
+        api.get('/quiz'),
+        api.get('/analytics')
+      ]);
+
+      setQuizzes(quizRes.data);
+      setStats({
+        averageAccuracy: analyticsRes.data.averageAccuracy || 0,
+        improvement: analyticsRes.data.improvement || 0
+      });
     } catch (error) {
-      console.error("Error fetching quizzes:", error);
+      console.error("Error fetching quiz data:", error);
     } finally {
       setLoading(false);
     }
@@ -37,15 +46,15 @@ const Quiz = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="gradient-secondary rounded-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+      <div className="glass rounded-2xl p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Adaptive Quizzes</h1>
-          <p className="text-white/90 text-lg">Test your knowledge and track your progress</p>
+          <p className="text-muted-foreground text-lg">Test your knowledge and track your progress</p>
         </div>
       </div>
 
-      {/* Performance Overview (Mock Data for now, can be connected to analytics later) */}
+      {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass">
           <CardContent className="p-6">
@@ -69,7 +78,7 @@ const Quiz = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Average Score</p>
-                <p className="text-2xl font-bold text-success">-</p>
+                <p className="text-2xl font-bold text-success">{Math.round(stats.averageAccuracy)}%</p>
               </div>
             </div>
           </CardContent>
@@ -83,7 +92,9 @@ const Quiz = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Improvement</p>
-                <p className="text-2xl font-bold">-</p>
+                <p className={`text-2xl font-bold ${stats.improvement >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {stats.improvement > 0 ? '+' : ''}{Math.round(stats.improvement)}%
+                </p>
               </div>
             </div>
           </CardContent>

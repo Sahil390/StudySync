@@ -74,7 +74,7 @@ const App = () => (
                 <Route path="/admin/upload" element={<AdminUpload />} />
                 <Route path="/admin/materials" element={<AdminMaterials />} />
                 <Route path="/admin/edit/:id" element={<AdminUpload />} />
-                <Route path="/admin/quiz/create" element={<AdminQuiz />} />
+                <Route path="/admin/quiz" element={<AdminQuiz />} />
               </Route>
             </Route>
           </Route>

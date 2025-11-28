@@ -118,7 +118,7 @@ const ForumPost = () => {
                         <div className="space-y-1">
                             <h1 className="text-2xl font-bold">{post.title}</h1>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Posted by {post.askedBy?.name || "Unknown"}</span>
+                                <span>Posted by {post.askedBy?.username || post.askedBy?.name || "Unknown"}</span>
                                 <span>•</span>
                                 <span>{post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : "Just now"}</span>
                             </div>
@@ -173,7 +173,7 @@ const ForumPost = () => {
                                                     {answer.answeredBy?.name?.[0] || "U"}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <span className="font-medium text-sm">{answer.answeredBy?.name || "Unknown"}</span>
+                                            <span className="font-medium text-sm">{answer.answeredBy?.username || answer.answeredBy?.name || "Unknown"}</span>
                                             <span className="text-xs text-muted-foreground">
                                                 {answer.createdAt ? formatDistanceToNow(new Date(answer.createdAt), { addSuffix: true }) : ""}
                                             </span>

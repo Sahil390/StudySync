@@ -92,9 +92,9 @@ const AdminMaterials = () => {
                     <p className="text-muted-foreground">View, edit, or delete study resources.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button onClick={() => navigate("/admin/quiz/create")} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+                    <Button onClick={() => navigate("/admin/quiz")} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
                         <Plus className="h-4 w-4" />
-                        Create Quiz
+                        Manage Quizzes
                     </Button>
                     <Button onClick={() => navigate("/admin/upload")} className="gap-2">
                         <Plus className="h-4 w-4" />

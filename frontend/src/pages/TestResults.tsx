@@ -2,7 +2,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Clock, Target, CheckCircle2, XCircle, BookOpen } from "lucide-react";
+import { Trophy, Clock, Target, CheckCircle2, XCircle, BookOpen, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TestResults = () => {
@@ -61,7 +61,7 @@ const TestResults = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
             <div className="text-center p-4 rounded-lg bg-muted/50">
               <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{score}/{totalQuestions}</p>
@@ -76,6 +76,11 @@ const TestResults = () => {
               <Trophy className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{percentage >= 75 ? "A" : percentage >= 60 ? "B" : percentage >= 40 ? "C" : "D"}</p>
               <p className="text-sm text-muted-foreground">Grade</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-muted/50">
+              <Crown className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+              <p className="text-2xl font-bold text-yellow-500">+{score * 10} XP</p>
+              <p className="text-sm text-muted-foreground">XP Gained</p>
             </div>
           </div>
         </CardContent>

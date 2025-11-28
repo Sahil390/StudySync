@@ -20,7 +20,7 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
 export const getQuestions = async (req: Request, res: Response) => {
     try {
         const questions = await Question.find()
-            .populate('askedBy', 'name')
+            .populate('askedBy', 'name username')
             .sort({ createdAt: -1 });
         res.json(questions);
     } catch (error) {
@@ -31,8 +31,8 @@ export const getQuestions = async (req: Request, res: Response) => {
 export const getQuestionById = async (req: Request, res: Response) => {
     try {
         const question = await Question.findById(req.params.id)
-            .populate('askedBy', 'name')
-            .populate('answers.answeredBy', 'name');
+            .populate('askedBy', 'name username')
+            .populate('answers.answeredBy', 'name username');
         if (question) {
             question.views += 1;
             await question.save();

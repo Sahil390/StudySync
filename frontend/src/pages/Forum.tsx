@@ -199,7 +199,7 @@ const Forum = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{post.askedBy?.name || "Unknown"}</span>
+                        <span>{post.askedBy?.username || post.askedBy?.name || "Unknown"}</span>
                         <span>•</span>
                         <span>{post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }) : "Just now"}</span>
                       </div>

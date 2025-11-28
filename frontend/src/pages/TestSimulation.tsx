@@ -10,10 +10,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const TestSimulation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, updateUser } = useAuth();
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +76,11 @@ const TestSimulation = () => {
         answers: formattedAnswers
       });
 
+      // Update local user state if available
+      if (user && updateUser) {
+        updateUser({ ...user, xp: (user.xp || 0) + (data.xpGained || 0) });
+      }
+
       navigate(`/test-results/${id}`, {
         state: {
           result: data,
@@ -80,6 +88,7 @@ const TestSimulation = () => {
           answers: answers,
           score: data.score,
           totalQuestions: data.totalQuestions,
+          xpGained: data.xpGained,
           timeTaken: (parseInt(quiz.duration || 30) * 60) - timeRemaining
         }
       });

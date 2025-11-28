@@ -21,6 +21,7 @@ const Leaderboard = () => {
     const fetchLeaderboard = async () => {
         try {
             const { data } = await api.get('/leaderboard');
+            console.log("Leaderboard data:", data);
             setUsers(data);
         } catch (error) {
             console.error("Error fetching leaderboard:", error);
@@ -66,7 +67,7 @@ const Leaderboard = () => {
                 <CardHeader className="bg-primary/5 border-b border-border/50">
                     <div className="grid grid-cols-12 gap-4 font-semibold text-sm text-muted-foreground px-4">
                         <div className="col-span-2 md:col-span-1 text-center">Rank</div>
-                        <div className="col-span-7 md:col-span-8">Student</div>
+                        <div className="col-span-7 md:col-span-8">User</div>
                         <div className="col-span-3 text-right">XP</div>
                     </div>
                 </CardHeader>
@@ -87,7 +88,7 @@ const Leaderboard = () => {
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-                                    <span className="font-semibold">{user.name}</span>
+                                    <span className="font-semibold">{user.username || user.name}</span>
                                     {user.badges && user.badges.length > 0 && (
                                         <div className="flex gap-1">
                                             {user.badges.slice(0, 3).map((badge: string, i: number) => (
@@ -99,17 +100,11 @@ const Leaderboard = () => {
                                     )}
                                 </div>
                             </div>
-                            <div className="col-span-3 text-right font-bold text-lg text-primary">
-                                {user.xp.toLocaleString()}
+                            <div className="col-span-3 text-right font-bold text-primary">
+                                {user.xp} XP
                             </div>
                         </div>
                     ))}
-
-                    {users.length === 0 && (
-                        <div className="p-8 text-center text-muted-foreground">
-                            No students found on the leaderboard yet.
-                        </div>
-                    )}
                 </CardContent>
             </Card>
         </div>

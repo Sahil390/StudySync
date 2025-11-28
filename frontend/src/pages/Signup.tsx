@@ -7,20 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { User } from "lucide-react";
 
 const Signup = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
-
-
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/auth/register', { name, email, password, role: 'student' });
+      const { data } = await api.post('/auth/register', {
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: 'student'
+      });
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
 
@@ -58,19 +66,35 @@ const Signup = () => {
                 id="name"
                 type="text"
                 placeholder="Sahil Kumar"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="username"
+                  placeholder="Choose a unique username"
+                  className="pl-10"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="student@studysync.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
@@ -80,8 +104,8 @@ const Signup = () => {
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
             </div>
@@ -100,15 +124,7 @@ const Signup = () => {
                 <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <Button variant="outline" type="button">
-                Google
-              </Button>
-              <Button variant="outline" type="button">
-                Microsoft
-              </Button>
-            </div>
+            {/* Social Buttons Removed as per request */}
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">

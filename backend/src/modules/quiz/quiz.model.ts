@@ -16,6 +16,7 @@ export interface IQuiz extends Document {
     chapter: string;
     topic: string;
     duration: number;
+    maxAttempts?: number;
     questions: IQuestion[];
     createdBy: mongoose.Schema.Types.ObjectId;
 }
@@ -30,6 +31,7 @@ const QuizSchema: Schema = new Schema(
         chapter: { type: String, required: true },
         topic: { type: String, required: true },
         duration: { type: Number, default: 20 },
+        maxAttempts: { type: Number, default: null }, // null means unlimited
         questions: [
             {
                 questionText: { type: String, required: true },

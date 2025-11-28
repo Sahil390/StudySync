@@ -60,7 +60,7 @@ const Profile = () => {
         xp: userData.xp || 0,
         streak: 1, // Mock
         completed: analytics.totalQuizzes || 0,
-        rank: myRank > 0 ? myRank : '-',
+        rank: analytics.rank || '-',
       });
 
       setSubjectAnalytics(analytics.subjectAnalytics || []);
@@ -99,21 +99,24 @@ const Profile = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Profile Header */}
-      <Card className="glass gradient-primary text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+      <Card className="glass relative overflow-hidden">
+        {/* <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div> */}
         <CardContent className="p-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <Avatar className="h-24 w-24 border-4 border-white/20">
-              <AvatarFallback className="text-3xl bg-white/20 text-white">
+            <Avatar className="h-24 w-24 border-4 border-primary/20">
+              <AvatarFallback className="text-3xl gradient-primary text-white">
                 {localUser?.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="text-center md:text-left flex-1">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{localUser?.name}</h1>
+                <div>
+                  <h1 className="text-3xl font-bold">{localUser?.name}</h1>
+                  <p className="text-muted-foreground">@{localUser?.username || 'username'}</p>
+                </div>
                 <Dialog open={isEditing} onOpenChange={setIsEditing}>
                   <DialogTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/20">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
                       <Edit2 className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
@@ -153,18 +156,18 @@ const Profile = () => {
                   </DialogContent>
                 </Dialog>
               </div>
-              <p className="text-white/90 mb-4">
+              <p className="text-muted-foreground mb-4">
                 {user?.grade ? `Class ${user.grade}` : 'Grade not set'} • {user?.board || 'Board not set'}
               </p>
               <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                <Badge variant="secondary" className="bg-white/20 text-white border-0 capitalize">
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20 capitalize">
                   {user?.role}
                 </Badge>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold mb-1">{stats.xp}</div>
-              <div className="text-white/80">Total XP</div>
+              <div className="text-4xl font-bold mb-1 gradient-primary bg-clip-text text-transparent">{stats.xp}</div>
+              <div className="text-muted-foreground">Total XP</div>
             </div>
           </div>
         </CardContent>

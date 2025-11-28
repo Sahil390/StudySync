@@ -6,10 +6,10 @@ export const getLeaderboard = async (req: Request, res: Response) => {
         const { type } = req.query; // 'global' or 'subject' (subject not implemented in User model yet for subject-wise XP)
 
         // For now, only global XP leaderboard
-        const leaderboard = await User.find({ role: 'student' })
-            .sort({ xp: -1 })
+        const leaderboard = await User.find({ role: { $in: ['student', 'admin'] } })
+            .sort({ xp: -1, createdAt: 1 }) // Tie-breaker: Older account wins
             .limit(10)
-            .select('name xp badges grade board');
+            .select('name username xp badges grade board');
 
         res.json(leaderboard);
     } catch (error) {

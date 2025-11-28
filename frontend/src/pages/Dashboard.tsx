@@ -26,9 +26,8 @@ const Dashboard = () => {
         // Fetch Analytics
         const { data: analytics } = await api.get('/analytics');
 
-        // Fetch Leaderboard for Rank
-        const { data: leaderboard } = await api.get('/leaderboard');
-        const myRank = leaderboard.findIndex((u: any) => u._id === user?._id) + 1;
+        // Fetch Leaderboard (optional, for display if needed, but rank comes from analytics now)
+        // const { data: leaderboard } = await api.get('/leaderboard');
 
         // Fetch Quizzes
         const { data: quizList } = await api.get('/quiz');
@@ -40,7 +39,7 @@ const Dashboard = () => {
           xp: analytics.xp || 0,
           streak: 1, // Mock streak for now
           completed: analytics.totalQuizzes || 0,
-          rank: myRank > 0 ? myRank : '-',
+          rank: analytics.rank || '-',
         });
 
         setSubjects(analytics.subjectAnalytics.map((s: any) => ({
@@ -78,11 +77,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome Section */}
-      <div className="gradient-primary rounded-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+      <div className="glass rounded-2xl p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome back, {user?.name || 'Student'}! 👋</h1>
-          <p className="text-white/90 text-lg">You're making great progress. Keep it up!</p>
+          <p className="text-muted-foreground text-lg">You're making great progress. Keep it up!</p>
         </div>
       </div>
 
@@ -107,10 +106,10 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Streak</p>
-                <p className="text-3xl font-bold text-warning">{stats.streak} Day</p>
+                <p className="text-3xl font-bold gradient-warning bg-clip-text text-transparent">{stats.streak} Day</p>
               </div>
-              <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
-                <Target className="h-6 w-6 text-warning" />
+              <div className="w-12 h-12 rounded-full gradient-warning flex items-center justify-center">
+                <Target className="h-6 w-6 text-white" />
               </div>
             </div>
           </CardContent>
@@ -121,10 +120,10 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Quizzes Taken</p>
-                <p className="text-3xl font-bold text-success">{stats.completed}</p>
+                <p className="text-3xl font-bold gradient-success bg-clip-text text-transparent">{stats.completed}</p>
               </div>
-              <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-success" />
+              <div className="w-12 h-12 rounded-full gradient-success flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
             </div>
           </CardContent>

@@ -72,7 +72,12 @@ All colors MUST be HSL.
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
 }
@@ -105,12 +110,33 @@ All colors MUST be HSL.
   .animate-pulse-subtle {
     animation: pulse-subtle 3s ease-in-out infinite;
   }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-accent;
+  }
+
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-warning to-orange-500;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500;
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-r from-green-500 to-emerald-500;
+  }
+
+  .gradient-warning {
+    @apply bg-gradient-to-r from-yellow-400 to-amber-600;
+  }
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -121,6 +147,7 @@ All colors MUST be HSL.
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -132,6 +159,7 @@ All colors MUST be HSL.
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -139,9 +167,12 @@ All colors MUST be HSL.
 }
 
 @keyframes pulse-subtle {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
