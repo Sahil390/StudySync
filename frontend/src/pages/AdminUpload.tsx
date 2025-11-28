@@ -144,17 +144,13 @@ const AdminUpload = () => {
 
         try {
             if (id) {
-                await api.put(`/study-materials/${id}`, data, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await api.put(`/study-materials/${id}`, data);
                 toast({
                     title: "Success!",
                     description: "Topic updated successfully.",
                 });
             } else {
-                await api.post("/study-materials", data, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await api.post("/study-materials", data);
                 toast({
                     title: "Success!",
                     description: "Topic created successfully.",

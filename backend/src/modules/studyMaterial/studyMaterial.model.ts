@@ -37,7 +37,7 @@ const StudyMaterialSchema: Schema = new Schema(
         grade: { type: String, required: true },
         subject: { type: String, required: true },
         chapter: { type: String, required: true },
-        topic: { type: String, required: true },
+        topic: { type: String, required: false },
         tags: [{ type: String }],
         views: { type: Number, default: 0 },
         uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

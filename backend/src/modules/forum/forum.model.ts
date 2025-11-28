@@ -6,6 +6,7 @@ export interface IAnswer extends Document {
     upvotes: mongoose.Schema.Types.ObjectId[];
     isVerified: boolean;
     createdAt: Date;
+    image?: string;
 }
 
 export interface IQuestion extends Document {
@@ -15,6 +16,7 @@ export interface IQuestion extends Document {
     tags: string[];
     answers: IAnswer[];
     views: number;
+    image?: string;
 }
 
 const AnswerSchema: Schema = new Schema(
@@ -23,6 +25,7 @@ const AnswerSchema: Schema = new Schema(
         answeredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         isVerified: { type: Boolean, default: false },
+        image: { type: String },
     },
     { timestamps: true }
 );
@@ -35,6 +38,7 @@ const QuestionSchema: Schema = new Schema(
         tags: [{ type: String }],
         answers: [AnswerSchema],
         views: { type: Number, default: 0 },
+        image: { type: String },
     },
     { timestamps: true }
 );

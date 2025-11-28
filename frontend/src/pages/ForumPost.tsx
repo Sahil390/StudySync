@@ -20,6 +20,7 @@ const ForumPost = () => {
     const [loading, setLoading] = useState(true);
     const [newAnswer, setNewAnswer] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
     useEffect(() => {
         if (id) {
@@ -49,18 +50,26 @@ const ForumPost = () => {
 
         setSubmitting(true);
         try {
-            await api.post(`/forum/${id}/answers`, { text: newAnswer });
+            const formData = new FormData();
+            formData.append('text', newAnswer);
+            if (selectedImage) {
+                formData.append('image', selectedImage);
+            }
+
+            await api.post(`/forum/${id}/answers`, formData);
+
             toast({
                 title: "Answer Posted",
                 description: "Your answer has been added.",
             });
             setNewAnswer("");
+            setSelectedImage(null);
             fetchPostDetails(); // Refresh to show new answer
         } catch (error) {
             console.error("Error posting answer:", error);
             toast({
                 title: "Error",
-                description: "Failed to post answer. Please try again.",
+                description: error.response?.data?.message || "Failed to post answer. Please try again.",
                 variant: "destructive",
             });
         } finally {
@@ -132,6 +141,12 @@ const ForumPost = () => {
 
                     <p className="text-lg leading-relaxed">{post.description}</p>
 
+                    {post.image && (
+                        <div className="mt-4">
+                            <img src={post.image} alt="Attachment" className="max-h-96 w-auto object-contain rounded-md" />
+                        </div>
+                    )}
+
                     <div className="flex flex-wrap gap-2 pt-2">
                         {post.tags.map((tag: string, i: number) => (
                             <Badge key={i} variant="outline">
@@ -186,6 +201,11 @@ const ForumPost = () => {
                                     </div>
 
                                     <p className="text-muted-foreground">{answer.text}</p>
+                                    {answer.image && (
+                                        <div className="mt-2">
+                                            <img src={answer.image} alt="Attachment" className="max-h-64 w-auto object-contain rounded-md" />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
@@ -205,6 +225,17 @@ const ForumPost = () => {
                         value={newAnswer}
                         onChange={(e) => setNewAnswer(e.target.value)}
                     />
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                            <label className="text-sm font-medium mb-1 block">Attachment (Optional)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                onChange={(e) => setSelectedImage(e.target.files ? e.target.files[0] : null)}
+                            />
+                        </div>
+                    </div>
                     <div className="flex justify-end">
                         <Button onClick={handleSubmitAnswer} disabled={submitting || !newAnswer.trim()}>
                             {submitting ? (

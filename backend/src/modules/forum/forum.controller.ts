@@ -12,6 +12,7 @@ export const createQuestion = async (req: AuthRequest, res: Response) => {
             description,
             tags,
             askedBy: req.user._id,
+            image: req.file ? req.file.path : undefined,
         });
         res.status(201).json(question);
     } catch (error) {
@@ -63,6 +64,9 @@ export const updateQuestion = async (req: AuthRequest, res: Response) => {
         question.title = title || question.title;
         question.description = description || question.description;
         question.tags = tags || question.tags;
+        if (req.file) {
+            question.image = req.file.path;
+        }
 
         await question.save();
         res.json(question);
@@ -101,6 +105,7 @@ export const addAnswer = async (req: AuthRequest, res: Response) => {
                 answeredBy: req.user._id,
                 upvotes: [],
                 isVerified: false,
+                image: req.file ? req.file.path : undefined,
             };
             question.answers.push(answer as any);
             await question.save();

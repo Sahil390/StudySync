@@ -58,16 +58,29 @@ const Forum = () => {
     }
   };
 
+
+
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  // ... (existing state)
+
   const handleAskQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const tagsArray = newQuestion.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
 
-      await api.post('/forum', {
-        title: newQuestion.title,
-        description: newQuestion.description,
-        tags: tagsArray,
-      });
+      const formData = new FormData();
+      formData.append('title', newQuestion.title);
+      formData.append('description', newQuestion.description);
+      tagsArray.forEach(tag => formData.append('tags[]', tag));
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+
+      await api.post('/forum', formData);
 
       toast({
         title: "Question Posted",
@@ -76,22 +89,17 @@ const Forum = () => {
 
       setIsDialogOpen(false);
       setNewQuestion({ title: "", description: "", tags: "" });
+      setSelectedImage(null);
       fetchQuestions(); // Refresh list
     } catch (error) {
       console.error("Error posting question:", error);
       toast({
         title: "Error",
-        description: "Failed to post question. Please try again.",
+        description: error.response?.data?.message || "Failed to post question. Please try again.",
         variant: "destructive",
       });
     }
   };
-
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
-  const [editingQuestion, setEditingQuestion] = useState<any>(null);
-
-  // ... (existing state)
 
   const handleUpdateQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,11 +108,15 @@ const Forum = () => {
     try {
       const tagsArray = newQuestion.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
 
-      await api.put(`/forum/${editingQuestion._id}`, {
-        title: newQuestion.title,
-        description: newQuestion.description,
-        tags: tagsArray,
-      });
+      const formData = new FormData();
+      formData.append('title', newQuestion.title);
+      formData.append('description', newQuestion.description);
+      tagsArray.forEach(tag => formData.append('tags[]', tag));
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+
+      await api.put(`/forum/${editingQuestion._id}`, formData);
 
       toast({
         title: "Question Updated",
@@ -114,12 +126,13 @@ const Forum = () => {
       setIsDialogOpen(false);
       setEditingQuestion(null);
       setNewQuestion({ title: "", description: "", tags: "" });
+      setSelectedImage(null);
       fetchQuestions();
     } catch (error) {
       console.error("Error updating question:", error);
       toast({
         title: "Error",
-        description: "Failed to update question.",
+        description: error.response?.data?.message || "Failed to update question.",
         variant: "destructive",
       });
     }
@@ -152,6 +165,7 @@ const Forum = () => {
       description: post.description,
       tags: post.tags.join(', '),
     });
+    setSelectedImage(null); // Reset image selection
     setIsDialogOpen(true);
   };
 
@@ -178,6 +192,7 @@ const Forum = () => {
           if (!open) {
             setEditingQuestion(null);
             setNewQuestion({ title: "", description: "", tags: "" });
+            setSelectedImage(null);
           }
         }}>
           <DialogTrigger asChild>
@@ -221,6 +236,15 @@ const Forum = () => {
                     placeholder="e.g., Chemistry, Class 10, Equations"
                     value={newQuestion.tags}
                     onChange={(e) => setNewQuestion({ ...newQuestion, tags: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="image">Attachment (Optional)</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setSelectedImage(e.target.files ? e.target.files[0] : null)}
                   />
                 </div>
               </div>
@@ -316,6 +340,12 @@ const Forum = () => {
                     </div>
 
                     <p className="text-muted-foreground line-clamp-2 cursor-pointer" onClick={() => navigate(`/forum/${post._id}`)}>{post.description}</p>
+
+                    {post.image && (
+                      <div className="mt-2 mb-2">
+                        <img src={post.image} alt="Attachment" className="h-32 w-auto object-cover rounded-md" />
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-4">
                       <div className="flex flex-wrap gap-2">
