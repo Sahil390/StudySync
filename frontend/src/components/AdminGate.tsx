@@ -6,19 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Shield, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const ADMIN_ID = "500119480";
 
 export const AdminGate = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [inputID, setInputID] = useState("");
     const { toast } = useToast();
+    const { user } = useAuth();
 
     useEffect(() => {
         const auth = sessionStorage.getItem("adminAuth");
-        if (auth === "true") {
+        if (auth === "true" || user?.role === 'admin') {
             setIsAuthenticated(true);
         }
-    }, []);
+    }, [user]);
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();

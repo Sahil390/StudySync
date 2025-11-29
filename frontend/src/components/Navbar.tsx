@@ -197,7 +197,7 @@ export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = f
                     <DropdownMenuItem>
                       <NavLink to="/profile" className="w-full">Profile</NavLink>
                     </DropdownMenuItem>
-                    {useAuth().user?.username === '500119480' && (
+                    {useAuth().user?.role === 'admin' && (
                       <DropdownMenuItem>
                         <NavLink to="/admin/upload" className="w-full flex items-center gap-2">
                           <Shield className="h-4 w-4" />

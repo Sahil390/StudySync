@@ -49,7 +49,7 @@ export const DashboardLayout = () => {
             <NavItem to="/quiz" icon={GraduationCap}>Quizzes</NavItem>
             <NavItem to="/forum" icon={MessageSquare}>Forum</NavItem>
             <NavItem to="/leaderboard" icon={Trophy}>Leaderboard</NavItem>
-            {useAuth().user?.username === '500119480' && (
+            {useAuth().user?.role === 'admin' && (
               <NavItem to="/admin/upload" icon={Shield}>Admin Dashboard</NavItem>
             )}
           </div>
