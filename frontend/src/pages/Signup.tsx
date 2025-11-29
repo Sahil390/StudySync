@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "lucide-react";
 
 const Signup = () => {
+  const [step, setStep] = useState<'signup' | 'otp'>('signup');
+  const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -22,25 +24,64 @@ const Signup = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/auth/register', {
+      await api.post('/auth/register', {
         name: formData.name,
         username: formData.username,
         email: formData.email,
         password: formData.password,
         role: 'student'
       });
+
+      setStep('otp');
+      toast({
+        title: "OTP Sent!",
+        description: `Please check your email (${formData.email}) for the verification code.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Signup Failed",
+        description: error.response?.data?.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data } = await api.post('/auth/verify-email', {
+        email: formData.email,
+        otp
+      });
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
 
       toast({
-        title: "Account Created!",
+        title: "Account Verified!",
         description: "Welcome to StudySync. Let's start learning!",
       });
       navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Signup Failed",
-        description: error.response?.data?.message || "Something went wrong",
+        title: "Verification Failed",
+        description: error.response?.data?.message || "Invalid OTP",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      await api.post('/auth/resend-otp', { email: formData.email });
+      toast({
+        title: "OTP Resent",
+        description: "A new OTP has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Resend",
+        description: error.response?.data?.message || "Could not resend OTP",
         variant: "destructive",
       });
     }
@@ -55,65 +96,102 @@ const Signup = () => {
           <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-glow">
             <span className="text-3xl font-bold text-white">S</span>
           </div>
-          <CardTitle className="text-3xl">Join StudySync</CardTitle>
-          <CardDescription>Create your account to start learning</CardDescription>
+          <CardTitle className="text-3xl">
+            {step === 'signup' ? 'Join StudySync' : 'Verify Email'}
+          </CardTitle>
+          <CardDescription>
+            {step === 'signup'
+              ? 'Create your account to start learning'
+              : `Enter the OTP sent to ${formData.email}`}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Sahil Kumar"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          {step === 'signup' ? (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
                 <Input
-                  id="username"
-                  placeholder="Choose a unique username"
-                  className="pl-10"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  id="name"
+                  type="text"
+                  placeholder="Sahil Kumar"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="student@studysync.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    placeholder="Choose a unique username"
+                    className="pl-10"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
 
-            <Button type="submit" className="w-full gradient-primary border-0">
-              Create Account
-            </Button>
-          </form>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="student@studysync.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full gradient-primary border-0">
+                Create Account
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">One-Time Password</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widest"
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full gradient-primary border-0">
+                Verify & Login
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={handleResendOtp}
+              >
+                Resend OTP
+              </Button>
+            </form>
+          )}
 
           <div className="mt-6">
             <div className="relative">

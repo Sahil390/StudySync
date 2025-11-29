@@ -12,6 +12,9 @@ export interface IUser extends Document {
     subjects?: string[];
     xp: number;
     badges: string[];
+    isVerified: boolean;
+    otp?: string;
+    otpExpires?: Date;
     createdAt: Date;
     comparePassword(password: string): Promise<boolean>;
 }
@@ -28,6 +31,9 @@ const UserSchema = new Schema<IUser>(
         subjects: [{ type: String }],
         xp: { type: Number, default: 0 },
         badges: [{ type: String }],
+        isVerified: { type: Boolean, default: false },
+        otp: { type: String },
+        otpExpires: { type: Date },
     },
     { timestamps: true }
 );
