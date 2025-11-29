@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
 import { useAuth } from "@/hooks/useAuth";
 
 const ADMIN_ID = "500119480";
@@ -14,9 +13,14 @@ export const AdminGate = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [inputID, setInputID] = useState("");
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
 
-    // Removed useEffect for auto-login to force ID check every time component mounts
+    if (loading) return null;
+
+    // Strict Role Check: If not admin, redirect immediately
+    if (!user || user.role !== 'admin') {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
