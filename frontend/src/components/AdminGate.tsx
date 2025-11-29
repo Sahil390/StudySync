@@ -16,17 +16,11 @@ export const AdminGate = () => {
     const { toast } = useToast();
     const { user } = useAuth();
 
-    useEffect(() => {
-        const auth = sessionStorage.getItem("adminAuth");
-        if (auth === "true" || user?.role === 'admin') {
-            setIsAuthenticated(true);
-        }
-    }, [user]);
+    // Removed useEffect for auto-login to force ID check every time component mounts
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         if (inputID === ADMIN_ID) {
-            sessionStorage.setItem("adminAuth", "true");
             setIsAuthenticated(true);
             toast({
                 title: "Access Granted",
