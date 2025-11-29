@@ -25,6 +25,7 @@ interface NavbarProps {
 }
 
 import { useAuth } from "@/hooks/useAuth";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = false, showUserControls = true }: NavbarProps) => {
   const { logout } = useAuth();
@@ -213,6 +214,8 @@ export const Navbar = ({ onMenuClick, showMenuButton = false, hideGetStarted = f
                 </DropdownMenu>
               </>
             )}
+
+            <ModeToggle />
 
             {!hideGetStarted && (
               <NavLink to="/login">
