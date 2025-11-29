@@ -170,45 +170,48 @@ export const testEmailConnection = async (req: Request, res: Response) => {
             log(`DNS Resolution Failed: ${(err as Error).message}`);
         }
 
-        // 3. Socket Connection Test (Port 465)
+        // 3. Socket Connection Test (Port 465 & 587)
         log('Testing TCP Connection to smtp.gmail.com:465...');
         try {
             await new Promise<void>((resolve, reject) => {
                 const socket = new net.Socket();
-                socket.setTimeout(5000); // 5s timeout
-
-                socket.on('connect', () => {
-                    log('Socket Connected Successfully!');
-                    socket.destroy();
-                    resolve();
-                });
-
-                socket.on('timeout', () => {
-                    socket.destroy();
-                    reject(new Error('Socket Timeout'));
-                });
-
-                socket.on('error', (err) => {
-                    reject(err);
-                });
-
+                socket.setTimeout(5000);
+                socket.on('connect', () => { log('Port 465: Connected!'); socket.destroy(); resolve(); });
+                socket.on('timeout', () => { socket.destroy(); reject(new Error('Timeout')); });
+                socket.on('error', (err) => reject(err));
                 socket.connect(465, 'smtp.gmail.com');
             });
         } catch (err) {
-            log(`Socket Connection Failed: ${(err as Error).message}`);
+            log(`Port 465 Failed: ${(err as Error).message}`);
+        }
+
+        log('Testing TCP Connection to smtp.gmail.com:587...');
+        try {
+            await new Promise<void>((resolve, reject) => {
+                const socket = new net.Socket();
+                socket.setTimeout(5000);
+                socket.on('connect', () => { log('Port 587: Connected!'); socket.destroy(); resolve(); });
+                socket.on('timeout', () => { socket.destroy(); reject(new Error('Timeout')); });
+                socket.on('error', (err) => reject(err));
+                socket.connect(587, 'smtp.gmail.com');
+            });
+        } catch (err) {
+            log(`Port 587 Failed: ${(err as Error).message}`);
         }
 
         // 4. Nodemailer Verify
         log('Testing Nodemailer Transporter...');
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
             auth: {
                 user: env.EMAIL_USER,
                 pass: env.EMAIL_PASS,
             },
-            family: 4,
-            logger: true,
-            debug: true,
+            tls: {
+                rejectUnauthorized: false, // Helps with some cloud proxy cert issues
+            },
             connectionTimeout: 5000,
         } as nodemailer.TransportOptions);
 
