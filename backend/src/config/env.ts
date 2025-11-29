@@ -14,6 +14,8 @@ const envSchema = z.object({
     CLIENT_URL: z.string().default('http://localhost:5173'),
     EMAIL_USER: z.string().optional(),
     EMAIL_PASS: z.string().optional(),
+    EMAIL_HOST: z.string().default('smtp.gmail.com'),
+    EMAIL_PORT: z.string().default('587'),
 });
 
 export const env = envSchema.parse(process.env);
