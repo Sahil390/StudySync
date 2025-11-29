@@ -1,3 +1,4 @@
+import express from 'express';
 import { register, login, getMe, updateProfile, sendSignupOtp, verifySignupOtp } from './auth.controller';
 import { protect } from '../../middleware/auth.middleware';
 
