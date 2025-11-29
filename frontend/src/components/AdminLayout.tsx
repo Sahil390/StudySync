@@ -28,6 +28,14 @@ export const AdminLayout = () => {
                     <div className="flex items-center gap-4">
 
                         <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2 text-slate-300 hover:text-white hover:bg-white/10"
+                            onClick={() => navigate('/dashboard')}
+                        >
+                            Back to Dashboard
+                        </Button>
+                        <Button
                             variant="destructive"
                             size="sm"
                             className="gap-2"

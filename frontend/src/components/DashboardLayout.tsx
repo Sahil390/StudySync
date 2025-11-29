@@ -50,7 +50,7 @@ export const DashboardLayout = () => {
             <NavItem to="/forum" icon={MessageSquare}>Forum</NavItem>
             <NavItem to="/leaderboard" icon={Trophy}>Leaderboard</NavItem>
             {useAuth().user?.role === 'admin' && (
-              <NavItem to="/admin/upload" icon={Shield}>Admin Dashboard</NavItem>
+              <NavItem to="/admin/materials" icon={Shield}>Admin Dashboard</NavItem>
             )}
           </div>
 
