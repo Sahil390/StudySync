@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import axios from 'axios';
 import { env } from '../config/env';
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
@@ -7,35 +7,27 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
         return;
     }
 
-    const transporter = nodemailer.createTransport({
-        host: env.EMAIL_HOST,
-        port: parseInt(env.EMAIL_PORT),
-        secure: false,
-        auth: {
-            user: env.EMAIL_USER,
-            pass: env.EMAIL_PASS,
-        },
-        tls: {
-            rejectUnauthorized: false, // Helps with some cloud proxy cert issues
-        },
-        connectionTimeout: 20000, // 20 seconds
-        greetingTimeout: 10000,   // 10 seconds
-        logger: true,
-        debug: true,
-    } as nodemailer.TransportOptions);
-
-    const mailOptions = {
-        from: env.EMAIL_USER,
-        to,
-        subject,
-        text,
-    };
-
+    // Use Brevo HTTP API to bypass SMTP port blocking
     try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Email sent to ${to}`);
-    } catch (error) {
-        console.error('Error sending email:', error);
+        await axios.post(
+            'https://api.brevo.com/v3/smtp/email',
+            {
+                sender: { email: env.EMAIL_USER, name: 'StudySync' },
+                to: [{ email: to }],
+                subject: subject,
+                textContent: text,
+            },
+            {
+                headers: {
+                    'api-key': env.EMAIL_PASS, // User must provide API Key here
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            }
+        );
+        console.log(`Email sent to ${to} via Brevo API`);
+    } catch (error: any) {
+        console.error('Error sending email via Brevo API:', error.response?.data || error.message);
         throw new Error('Email could not be sent');
     }
 };
