@@ -27,9 +27,19 @@ export const sendSignupOtp = async (req: Request, res: Response) => {
             { upsert: true, new: true }
         );
 
-        await sendEmail(email, 'StudySync - Signup Verification', `Your verification code is: ${otp}`);
+        // ALWAYS Log OTP to console (Fallback for blocked SMTP)
+        console.log(`==================================================`);
+        console.log(`[OTP] Generated for ${email}: ${otp}`);
+        console.log(`==================================================`);
 
-        res.json({ message: 'OTP sent successfully' });
+        try {
+            await sendEmail(email, 'StudySync - Signup Verification', `Your verification code is: ${otp}`);
+        } catch (emailError) {
+            console.error('Email sending failed (using console log fallback):', emailError);
+            // Do NOT return error to client, allow them to use the console OTP
+        }
+
+        res.json({ message: 'OTP generated. If email fails, check server logs.' });
 
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
