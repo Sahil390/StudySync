@@ -1,75 +1,72 @@
-# React + TypeScript + Vite
+# StudySync
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+StudySync is a comprehensive educational platform designed to enhance student learning through study materials, adaptive quizzes, discussion forums, and gamification. It connects students and teachers, enabling a collaborative environment where teachers can upload resources and create assessments, while students can access materials, test their knowledge, and track their progress through detailed analytics and leaderboards.
 
-Currently, two official plugins are available:
+## 🚀 Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Check out the deployed application: **[https://mystudysync.vercel.app](https://mystudysync.vercel.app)**
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+-   **Authentication & Authorization**: Secure registration and login with role-based access control (Student, Teacher, Admin).
+-   **Profile Management**: Personalized profiles with gamification elements like XP, Badges, and Ranks.
+-   **Study Material Repository**: Teachers can upload PDF materials; Students can browse and filter by subject/topic.
+-   **Adaptive Quizzes**: Interactive quizzes with automatic scoring and difficulty levels.
+-   **Discussion Forum**: A community space for asking questions, upvoting answers, and getting teacher verification.
+-   **Analytics & Leaderboard**: Visual dashboards for tracking performance and a global leaderboard to foster healthy competition.
 
-Note: This will impact Vite dev & build performances.
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+### Frontend
+-   **Framework**: React (Vite)
+-   **Language**: TypeScript
+-   **Styling**: Tailwind CSS, Shadcn UI
+-   **State Management & Data Fetching**: React Query (@tanstack/react-query)
+-   **Forms & Validation**: React Hook Form, Zod
+-   **Routing**: React Router DOM
+-   **Charts**: Recharts
+-   **Icons**: Lucide React
+-   **HTTP Client**: Axios
+-   **Other Tools**: React PDF, React Quill, Sonner
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend
+-   **Runtime**: Node.js
+-   **Framework**: Express.js
+-   **Language**: TypeScript
+-   **Database**: MongoDB (with Mongoose)
+-   **Authentication**: JWT, Bcryptjs
+-   **File Storage**: Cloudinary (with Multer)
+-   **Validation**: Zod
+-   **Email**: Nodemailer
+-   **Scheduling**: Node Cron
+-   **Security**: Helmet, CORS
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🏃‍♂️ Running Locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+-   Node.js installed
+-   MongoDB URI
+-   Cloudinary Credentials
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Steps
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/Sahil390/StudySync.git
+    cd StudySync
+    ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2.  **Setup Backend**
+    ```bash
+    cd backend
+    npm install
+    # Create a .env file with your credentials (PORT, MONGO_URI, JWT_SECRET, CLOUDINARY_*, etc.)
+    npm run dev
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3.  **Setup Frontend**
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
