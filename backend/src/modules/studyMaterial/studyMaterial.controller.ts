@@ -59,7 +59,7 @@ export const createStudyMaterial = async (req: AuthRequest, res: Response) => {
 
 export const getStudyMaterials = async (req: Request, res: Response) => {
     try {
-        const { board, grade, subject, chapter, topic, tags, search } = req.query;
+        const { board, grade, subject, chapter, topic, tags, search, limit } = req.query;
         const query: any = {};
 
         if (board) query.board = board;
@@ -75,7 +75,13 @@ export const getStudyMaterials = async (req: Request, res: Response) => {
             ];
         }
 
-        const materials = await StudyMaterial.find(query).populate('uploadedBy', 'name');
+        const materialQuery = StudyMaterial.find(query).populate('uploadedBy', 'name');
+
+        if (limit) {
+            materialQuery.limit(Number(limit));
+        }
+
+        const materials = await materialQuery;
         res.json(materials);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });

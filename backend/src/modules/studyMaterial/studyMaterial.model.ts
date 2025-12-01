@@ -45,4 +45,8 @@ const StudyMaterialSchema: Schema = new Schema(
     { timestamps: true }
 );
 
+// Add indexes for efficient filtering and searching
+StudyMaterialSchema.index({ board: 1, grade: 1, subject: 1, chapter: 1, topic: 1 });
+StudyMaterialSchema.index({ title: 'text', description: 'text' });
+
 export const StudyMaterial = mongoose.model<IStudyMaterial>('StudyMaterial', StudyMaterialSchema);

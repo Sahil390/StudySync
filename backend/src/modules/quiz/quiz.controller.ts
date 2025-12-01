@@ -33,7 +33,7 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
 
 export const getQuizzes = async (req: AuthRequest, res: Response) => {
     try {
-        const { board, grade, subject, chapter, topic } = req.query;
+        const { board, grade, subject, chapter, topic, limit } = req.query;
         const query: any = {};
 
         if (board) query.board = board;
@@ -42,7 +42,13 @@ export const getQuizzes = async (req: AuthRequest, res: Response) => {
         if (chapter) query.chapter = chapter;
         if (topic) query.topic = topic;
 
-        const quizzes = await Quiz.find(query).populate('createdBy', 'name').lean();
+        const quizQuery = Quiz.find(query).populate('createdBy', 'name').lean();
+
+        if (limit) {
+            quizQuery.limit(Number(limit));
+        }
+
+        const quizzes = await quizQuery;
 
         // Get attempts for the current user
         const userAttempts = await QuizAttempt.find({ student: req.user._id });

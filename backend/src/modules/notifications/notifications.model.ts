@@ -18,4 +18,7 @@ const NotificationSchema: Schema = new Schema(
     { timestamps: true }
 );
 
+// Add index for efficient fetching of user notifications
+NotificationSchema.index({ user: 1, createdAt: -1 });
+
 export const Notification = mongoose.model<INotification>('Notification', NotificationSchema);

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Trophy, Zap, Clock, TrendingUp, Target, Bell } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import api from "@/lib/api";
@@ -10,30 +11,26 @@ import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState({ xp: 0, streak: 0, completed: 0, rank: 0 });
   const [subjects, setSubjects] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!user) return; // Wait for user to be loaded
-
+        if (!user) return;
 
         // Fetch Analytics
         const { data: analytics } = await api.get('/analytics');
 
-        // Fetch Leaderboard (optional, for display if needed, but rank comes from analytics now)
-        // const { data: leaderboard } = await api.get('/leaderboard');
-
         // Fetch Quizzes
-        const { data: quizList } = await api.get('/quiz');
+        const { data: quizList } = await api.get('/quiz?limit=3');
 
         // Fetch Notifications (as Activity)
-        const { data: notifications } = await api.get('/notifications');
+        const { data: notifications } = await api.get('/notifications?limit=3');
 
         setStats({
           xp: analytics.xp || 0,
@@ -59,19 +56,100 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     };
 
-    if (user) {
-      fetchData();
-    } else {
-      setLoading(false);
+    if (!authLoading) {
+      if (user) {
+        fetchData();
+      } else {
+        setDataLoading(false);
+      }
     }
-  }, [user]);
+  }, [user, authLoading]);
 
-  if (loading) {
-    return <div className="p-8 text-center">Loading dashboard...</div>;
+  if (authLoading || dataLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Welcome Section Skeleton */}
+        <div className="bg-card shadow-sm border rounded-2xl p-8 h-40 flex flex-col justify-center space-y-4">
+          <Skeleton className="h-10 w-3/4 md:w-1/2" />
+          <Skeleton className="h-6 w-1/2 md:w-1/3" />
+        </div>
+
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="bg-card shadow-sm border h-32">
+              <CardContent className="p-6 flex items-center justify-between h-full">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-8 w-12" />
+                </div>
+                <Skeleton className="h-12 w-12 rounded-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Subject Performance Skeleton */}
+          <Card className="bg-card shadow-sm border h-64">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Quizzes Skeleton */}
+          <Card className="bg-card shadow-sm border h-64">
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex justify-between items-center p-2">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity Skeleton */}
+        <Card className="bg-card shadow-sm border h-48">
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

@@ -5,7 +5,14 @@ import { User } from '../auth/auth.model';
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
     try {
-        const notifications = await Notification.find({ user: req.user._id }).sort({ createdAt: -1 });
+        const { limit } = req.query;
+        const query = Notification.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+        if (limit) {
+            query.limit(Number(limit));
+        }
+
+        const notifications = await query;
         res.json(notifications);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
